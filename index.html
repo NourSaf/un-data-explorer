@@ -6,7 +6,7 @@
     <title>Human Rights Data Explorer</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: monospace;
             margin: 0;
             padding: 0;
         }
@@ -86,13 +86,17 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
+            font-family: monospace;
         }
         .dataset-button{
             background-color: black;
             color: white;
             border: none;
             cursor: pointer;
-            padding: 10px;
+            padding: 15px 26px 15px 26px;
+            font-family: monospace;
+            border-radius: 30px;
+
         }
         .dataset-button-link{
             /* padding-top: 10px; */
@@ -110,11 +114,14 @@
         .linkdiv{
             padding-top: 20px;
         }
+        h1{
+            font-size: 3rem;
+        }
     </style>
 </head>
 <body>
     <div id="landing">
-        <h1>Welcome to the Human Rights Index Data Explorer</h1>
+        <h1>Welcome to the Human Rights <br>Index Data Explorer</h1>
         <p>This data is from the Human Rights Index page</p>
 
         <p>Choose a dataset to explore:</p>
