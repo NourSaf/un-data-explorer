@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAT Data Explorer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        #landing {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+        #dataContainer {
+            display: none;
+            padding: 20px;
+        }
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            background-color: white;
+            z-index: 1000;
+            padding: 10px 0;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            cursor: pointer;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+        select {
+            padding: 5px;
+            flex-grow: 1;
+        }
+        .header-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .back-button {
+            display: flex;
+            align-items: center;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+        }
+        .back-button::before {
+            content: "\2190";
+            margin-right: 5px;
+        }
+        #downloadBtn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+        }
+        .dataset-buttons{
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .dataset-button{
+            background-color: black;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="landing">
+        <h1>Welcome to the CAT Data Explorer</h1>
+        <p>This data is from the Human Rights Index page of the Committee against Torture.</p>
+        <p>Choose a dataset to explore:</p>
+        <div class="dataset-buttons">
+            <button class="dataset-button" onclick="showData('ohchr_cat_2022_2024.csv')">Committee against Torture Dataset</button>
+            <button class="dataset-button" onclick="showData('ohchr_cac_2022_2024.csv')">Committee on the Rights of the Child</button>
+            <button class="dataset-button" onclick="showData('Special-Rapporteur-in-the-field-of-cultural-rights.csv')">Special Rapporteur in the field of cultural rights</button>
+        </div>
+    </div>
+
+    <div id="dataContainer">
+        <div class="sticky-header">
+            <div class="header-buttons">
+                <button class="back-button" onclick="goBack()">Back</button>
+                <button id="downloadBtn">Download CSV</button>
+            </div>
+            <h2>CAT Data</h2>
+            <div class="filters" id="filters"></div>
+        </div>
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>Year</th>
+                    <th>Country</th>
+                    <th>Concerned Group</th>
+                    <th>Human Rights Theme</th>
+                    <th>Annotation Type</th>
+                    <th>Term</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        const table = document.getElementById('dataTable');
+        const tbody = table.querySelector('tbody');
+        const filtersContainer = document.getElementById('filters');
+        const downloadBtn = document.getElementById('downloadBtn');
+        let data = [];
+        let currentDataset = '';
+        const columns = ['year', 'country', 'concernedGroup', 'humanRightsTheme', 'annotationType', 'term'];
+
+        function showData(dataset) {
+            currentDataset = dataset;
+            document.getElementById('landing').style.display = 'none';
+            document.getElementById('dataContainer').style.display = 'block';
+            fetchData(dataset);
+        }
+
+        function goBack() {
+            document.getElementById('landing').style.display = 'flex';
+            document.getElementById('dataContainer').style.display = 'none';
+            filtersContainer.innerHTML = '';
+        }
+
+        async function fetchData(dataset) {
+            const response = await fetch(dataset);
+            const text = await response.text();
+            const rows = text.split('\n').slice(1);
+            data = rows.map(row => {
+                const [, , year, country, concernedGroup, humanRightsTheme, annotationType, term] = row.split(',');
+                return { year, country, concernedGroup, humanRightsTheme, annotationType, term };
+            });
+            createFilters();
+            renderTable(data);
+            updateTitle(dataset);
+        }
+
+        function updateTitle(dataset) {
+            const yearRange = dataset.match(/\d{4}/g);
+            const title = `CAT Data from ${yearRange[0]} to ${yearRange[1]}`;
+            document.querySelector('#dataContainer h2').textContent = title;
+        }
+
+        function createFilters() {
+            columns.forEach(column => {
+                const select = document.createElement('select');
+                select.id = column + 'Filter';
+                select.innerHTML = `<option value="">All ${column.charAt(0).toUpperCase() + column.slice(1)}</option>`;
+                
+                const uniqueValues = [...new Set(data.map(item => item[column]))];
+                uniqueValues.forEach(value => {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.textContent = value;
+                    select.appendChild(option);
+                });
+                
+                select.addEventListener('change', filterTable);
+                filtersContainer.appendChild(select);
+            });
+        }
+
+        function renderTable(data) {
+            tbody.innerHTML = '';
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                Object.values(row).forEach(value => {
+                    const td = document.createElement('td');
+                    td.textContent = value;
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterTable() {
+            const filters = columns.reduce((acc, column) => {
+                acc[column] = document.getElementById(column + 'Filter').value;
+                return acc;
+            }, {});
+
+            const filteredData = data.filter(row =>
+                Object.entries(filters).every(([key, value]) =>
+                    value === '' || row[key] === value
+                )
+            );
+
+            renderTable(filteredData);
+        }
+
+        downloadBtn.addEventListener('click', () => {
+            const csvContent = "data:text/csv;charset=utf-8," 
+                + columns.join(",") + "\n"
+                + data.map(row => Object.values(row).join(",")).join("\n");
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", currentDataset);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+    </script>
+</body>
+
+</html>
