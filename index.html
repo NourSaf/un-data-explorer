@@ -94,18 +94,38 @@
             cursor: pointer;
             padding: 10px;
         }
+        .dataset-button-link{
+            /* padding-top: 10px; */
+            text-decoration: none;
+            color: white;
+            background-color: #d0d0d0;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            display: inline-block;
+            border-radius: 20px;
+            padding-right: 20px;
+            padding-left: 20px;
+        }
+        .linkdiv{
+            padding-top: 20px;
+        }
     </style>
 </head>
 <body>
     <div id="landing">
-        <h1>Welcome to the CAT Data Explorer</h1>
-        <p>This data is from the Human Rights Index page of the Committee against Torture.</p>
+        <h1>Welcome to the Human Rights Index Data Explorer</h1>
+        <p>This data is from the Human Rights Index page</p>
+
         <p>Choose a dataset to explore:</p>
         <div class="dataset-buttons">
             <button class="dataset-button" onclick="showData('ohchr_cat_2022_2024.csv')">Committee against Torture Dataset</button>
             <button class="dataset-button" onclick="showData('ohchr_cac_2022_2024.csv')">Committee on the Rights of the Child</button>
             <button class="dataset-button" onclick="showData('Special-Rapporteur-in-the-field-of-cultural-rights.csv')">Special Rapporteur in the field of cultural rights</button>
         </div>
+        <div class="linkdiv">
+        <a href="https://uhri.ohchr.org/en" target="_blank" class="dataset-button-link">Visit UHRI</a>
+    </div>
     </div>
 
     <div id="dataContainer">
